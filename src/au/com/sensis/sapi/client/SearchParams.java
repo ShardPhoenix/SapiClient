@@ -9,6 +9,14 @@ import au.com.sensis.sapi.requestmodel.ProductKeyword;
 import au.com.sensis.sapi.requestmodel.SortBy;
 import au.com.sensis.sapi.requestmodel.State;
 
+/**
+ * Represents the query parameters to be passed to the /search endpoint of SAPI.
+ * For a description of what these parameters mean, see:
+ * http://developers.sensis.com.au/docs/endpoint_reference/Search
+ * You can also try out searches with the API explorer:
+ * http://developers.sensis.com.au/page/api_explorer
+ *
+ */
 public class SearchParams {
 	
 	private final String query;
@@ -26,8 +34,6 @@ public class SearchParams {
 	private final Double radius;
 	private final BoundingBox boundingBox;
 	private final Integer locationTiers;
-	
-	//TODO: test, javadoc
 	
 	private SearchParams(Builder builder) {
 		this.query = builder.query;
@@ -205,6 +211,4 @@ public class SearchParams {
 	public BoundingBox getBoundingBox() {
 		return boundingBox;
 	}
-
-
 }

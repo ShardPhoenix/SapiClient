@@ -57,7 +57,7 @@ public class SapiClient {
 		this.apiKey = apiKey;
 	}
 	
-	//TODO: add getByListingId endpoint
+	//TODO: add getByListingId endpoint, **report**, metadata
 	
 	/**
 	 * Calls the search endpoint with desired parameters, returning a SearchResponse object which contains listings and various metadata.
