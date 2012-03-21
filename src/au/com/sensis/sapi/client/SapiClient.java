@@ -28,9 +28,10 @@ import au.com.sensis.sapi.responsemodel.SearchResponse;
 public class SapiClient {
     public static final String SAPI_HOST = "api.sensis.com.au";
     public static final int SAPI_PORT = 80;
-    public static final String SEARCH_PATH = "/ob-20110511/test/search"; //TODO: can this change? - test vs prod - make configurable?
-    public static final String REPORT_PATH = "/ob-20110511/test/report";
-
+    
+    public static final String SEARCH_PATH_TEMPLATE = "/ob-20110511/%s/search"; //TODO: can this change? - test vs prod - make configurable?
+    public static final String REPORT_PATH_TEMPLATE = "/ob-20110511/%s/report";
+    
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
@@ -39,6 +40,8 @@ public class SapiClient {
     }
 
     private final String apiKey;
+    private final String searchPath;
+    private final String reportPath;
 
     private String proxyUrl;
     private int proxyPort;
@@ -47,7 +50,7 @@ public class SapiClient {
      * SapiClient is a simple client for making requests to SAPI, the Sensis API.
      * 
      * Example usage:
-     * SapiClient client = new Client("my-sapi-api-key");
+     * SapiClient client = new SapiClient("my-sapi-api-key", SapiEnvironment.TEST);
      * SearchParams params = new SearchParams.Builder()
      * 		.withQuery("tyres").withLocation("melbourne").withPage(2).withPostcode(3000).withPostcode(3001).build();
      * SearchResponse response = client.search(params);
@@ -57,71 +60,13 @@ public class SapiClient {
      * If you don't have an api key yet, you need to register for one at http://developers.sensis.com.au/
      * @param apiKey
      */
-    public SapiClient(String apiKey) {
+    public SapiClient(String apiKey, SapiEnvironment environment) {
         this.apiKey = apiKey;
+        this.searchPath = String.format(SEARCH_PATH_TEMPLATE, environment.toString());
+        this.reportPath = String.format(REPORT_PATH_TEMPLATE, environment.toString());
     }
 
     //TODO: add getByListingId endpoint, metadata
-
-    /**
-     * It is required that you use this endpoint to report various user actions back to Sensis. For an explanation of
-     * what needs to be reported and how, see: http://developers.sensis.com.au/docs/using_endpoints/Reporting_Usage_Events
-     * You can check the ReportResponse to ensure that the report was successful.
-     * 
-     * @param reportEvent
-     * @param userIp
-     * @param userAgent
-     * @param userSessionId
-     * @param content
-     * @param reportingId
-     * @param additionalReportingIds
-     * @return
-     */
-    public ReportReponse report(ReportingEvent reportEvent, String userIp, String userAgent, String userSessionId, String content,
-            String reportingId, String... additionalReportingIds) {
-        URI uri = null;
-        String jsonResponse = null;
-        try {
-            HttpClient client = getHttpClient();
-
-            List<BasicNameValuePair> queryParams = new ArrayList<BasicNameValuePair>();
-
-            addQueryParam(queryParams, "key", apiKey);
-
-            addQueryParam(queryParams, "userIp", userIp);
-            addQueryParam(queryParams, "userAgent", userAgent);
-            addQueryParam(queryParams, "userSessionId", userSessionId);
-            addQueryParam(queryParams, "content", content);
-            addQueryParam(queryParams, "id", reportingId);
-            addQueryParams(queryParams, "id", Arrays.asList(additionalReportingIds));
-
-            uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, REPORT_PATH + "/" + reportEvent.toString(),
-                    URLEncodedUtils.format(queryParams, "UTF-8"), null);
-
-            System.out.println(uri); //TODO: remove
-
-            HttpGet request = new HttpGet(uri);
-
-            HttpResponse httpResponse = client.execute(request);
-
-            jsonResponse = extractJsonResponse(httpResponse);
-
-            System.out.println(jsonResponse); //TODO: remove
-
-            ReportReponse reportResponse = OBJECT_MAPPER.readValue(jsonResponse, ReportReponse.class);
-
-            return reportResponse;
-        } catch (Exception e) {
-            String errorMessage = "";
-            if (jsonResponse != null) {
-                errorMessage = "Successfully called SAPI, but could not parse response: " + jsonResponse;
-            } else {
-                errorMessage = "Could not successfully call SAPI with url " + uri + " due to exception";
-            }
-            throw new RuntimeException(errorMessage, e);
-        }
-
-    }
 
     /**
      * Calls the search endpoint with desired parameters, returning a SearchResponse object which contains listings and various metadata.
@@ -160,7 +105,7 @@ public class SapiClient {
             addQueryParam(queryParams, "locationTiers", params.getLocationTiers());
             addQueryParam(queryParams, "boundingBox", params.getBoundingBox());
 
-            uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, SEARCH_PATH, URLEncodedUtils.format(queryParams, "UTF-8"), null);
+            uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, searchPath, URLEncodedUtils.format(queryParams, "UTF-8"), null);
 
             System.out.println(uri); //TODO: remove
 
@@ -184,7 +129,74 @@ public class SapiClient {
             }
             throw new RuntimeException(errorMessage, e);
         }
+    }
+    
+    /**
+     * It is required that you use this endpoint to report various user actions back to Sensis. For an explanation of
+     * what needs to be reported and how, see: http://developers.sensis.com.au/docs/using_endpoints/Reporting_Usage_Events
+     * You can check the ReportResponse to ensure that the report was successful.
+     * 
+     * @param reportEvent
+     * @param userIp
+     * @param userAgent
+     * @param userSessionId
+     * @param content
+     * @param reportingId
+     * @param additionalReportingIds
+     * @return
+     */
+    public ReportReponse report(ReportingEvent reportEvent, String userIp, String userAgent, String userSessionId, String content,
+            String reportingId, String... additionalReportingIds) {
+        URI uri = null;
+        String jsonResponse = null;
+        try {
+            HttpClient client = getHttpClient();
 
+            List<BasicNameValuePair> queryParams = new ArrayList<BasicNameValuePair>();
+
+            addQueryParam(queryParams, "key", apiKey);
+
+            addQueryParam(queryParams, "userIp", userIp);
+            addQueryParam(queryParams, "userAgent", userAgent);
+            addQueryParam(queryParams, "userSessionId", userSessionId);
+            addQueryParam(queryParams, "content", content);
+            addQueryParam(queryParams, "id", reportingId);
+            addQueryParams(queryParams, "id", Arrays.asList(additionalReportingIds));
+
+            uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, reportPath + "/" + reportEvent.toString(),
+                    URLEncodedUtils.format(queryParams, "UTF-8"), null);
+
+            System.out.println(uri); //TODO: remove
+
+            HttpGet request = new HttpGet(uri);
+
+            HttpResponse httpResponse = client.execute(request);
+
+            jsonResponse = extractJsonResponse(httpResponse);
+
+            System.out.println(jsonResponse); //TODO: remove
+
+            ReportReponse reportResponse = OBJECT_MAPPER.readValue(jsonResponse, ReportReponse.class);
+
+            return reportResponse;
+        } catch (Exception e) {
+            String errorMessage = "";
+            if (jsonResponse != null) {
+                errorMessage = "Successfully called SAPI, but could not parse response: " + jsonResponse;
+            } else {
+                errorMessage = "Could not successfully call SAPI with url " + uri + " due to exception";
+            }
+            throw new RuntimeException(errorMessage, e);
+        }
+
+    }
+
+    /**
+     * May need to be set if you have a proxy in your test environment.
+     */
+    public void setProxy(String proxyUrl, int port) {
+        this.proxyUrl = proxyUrl;
+        this.proxyPort = port;
     }
 
     private HttpClient getHttpClient() {
@@ -222,15 +234,4 @@ public class SapiClient {
             }
         }
     }
-
-    /**
-     * May need to be set if you have a proxy in your test environment.
-     * @param host
-     * @param port
-     */
-    public void setProxyInfo(String proxyUrl, int port) {
-        this.proxyUrl = proxyUrl;
-        this.proxyPort = port;
-    }
-
 }
