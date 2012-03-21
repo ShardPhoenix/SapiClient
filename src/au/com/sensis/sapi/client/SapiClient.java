@@ -21,6 +21,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import au.com.sensis.sapi.requestmodel.ReportingEvent;
 import au.com.sensis.sapi.responsemodel.ReportReponse;
 import au.com.sensis.sapi.responsemodel.SearchResponse;
 
@@ -63,7 +64,7 @@ public class SapiClient {
 	//TODO: add getByListingId endpoint, **report**, metadata
 	
 	//TODO: javadoc
-	public ReportReponse report(String userIp, String userAgent, 
+	public ReportReponse report(ReportingEvent reportEvent, String userIp, String userAgent, 
 	        String userSessionId, String content, String reportingId, String... additionalReportingIds) {
 	    URI uri = null;
         String jsonResponse = null;
@@ -78,10 +79,10 @@ public class SapiClient {
         addQueryParam(queryParams, "userAgent", userAgent);
         addQueryParam(queryParams, "userSessionId", userSessionId);
         addQueryParam(queryParams, "content", content);
-        addQueryParam(queryParams, "reportingId", reportingId);
-        addQueryParams(queryParams, "reportingId", Arrays.asList(additionalReportingIds));
+        addQueryParam(queryParams, "id", reportingId);
+        addQueryParams(queryParams, "id", Arrays.asList(additionalReportingIds));
         
-        uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, REPORT_PATH, URLEncodedUtils.format(queryParams, "UTF-8"), null);
+        uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, REPORT_PATH + "/" + reportEvent.toString(), URLEncodedUtils.format(queryParams, "UTF-8"), null);
         
         System.out.println(uri); //TODO: remove
         
