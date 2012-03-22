@@ -62,6 +62,7 @@ public class SapiClient {
      * This will query SAPI for the 2nd page of tyre-related listings near Melbourne, restricted to postcodes 3000 and 3001.
      * 
      * If using SapiClient from Android, you must use it from either an AsyncTask or a Service (network IO is not allowed on the main thread).
+     * 
      * If you don't have an api key yet, you need to register for one at http://developers.sensis.com.au/
      * @param apiKey
      */
