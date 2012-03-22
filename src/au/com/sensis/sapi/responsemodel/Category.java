@@ -5,6 +5,10 @@ public class Category {
     private String id;
     private String name;
     private boolean sensitive;
+    
+    public Category(int id) {
+        this.id = String.valueOf(id);
+    }
 
     public Category(String id, String name) {
         this.id = id;

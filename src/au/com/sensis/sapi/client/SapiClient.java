@@ -22,6 +22,7 @@ import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import au.com.sensis.sapi.requestmodel.ReportingEvent;
+import au.com.sensis.sapi.responsemodel.MetadataResponse;
 import au.com.sensis.sapi.responsemodel.ReportReponse;
 import au.com.sensis.sapi.responsemodel.SearchResponse;
 
@@ -32,6 +33,7 @@ public class SapiClient {
     public static final String SEARCH_PATH_TEMPLATE = "/ob-20110511/%s/search";
     public static final String REPORT_PATH_TEMPLATE = "/ob-20110511/%s/report";
     private static final String GET_BY_LISTING_ID_PATH_TEMPLATE = "/ob-20110511/%s/getByListingId";
+    private static final String METADATA_PATH_TEMPLATE = "/ob-20110511/%s/metadata";
     
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -44,6 +46,7 @@ public class SapiClient {
     private final String searchPath;
     private final String reportPath;
     private final String getByListingIdPath;
+    private final String metadataPath;
 
     private String proxyUrl;
     private int proxyPort;
@@ -67,13 +70,15 @@ public class SapiClient {
         this.searchPath = String.format(SEARCH_PATH_TEMPLATE, environment.toString());
         this.reportPath = String.format(REPORT_PATH_TEMPLATE, environment.toString());
         this.getByListingIdPath = String.format(GET_BY_LISTING_ID_PATH_TEMPLATE, environment.toString());
+        this.metadataPath = String.format(METADATA_PATH_TEMPLATE, environment.toString());
     }
-
-    //TODO: add metadata endpoint
     
     /**
      * Calls the search endpoint with desired parameters, returning a SearchResponse object which contains listings and various metadata.
      * This method will throw a runtime exception if there is an exception during the search request.
+     * 
+     * If you don't get any results when it seems like you should, check the ValidationErrors in the SearchResponse
+     * 
      * More info at: http://developers.sensis.com.au/docs/endpoint_reference/Search
      * Interactive API explorer: http://developers.sensis.com.au/page/api_explorer
      * @param params
@@ -89,7 +94,6 @@ public class SapiClient {
 
             addQueryParam(queryParams, "key", apiKey);
 
-            //TODO: handle error if both query and location are null or empty (or either is!)
             addQueryParam(queryParams, "query", params.getQuery());
             addQueryParam(queryParams, "location", params.getLocation());
             addQueryParam(queryParams, "sortBy", params.getSortBy());
@@ -157,6 +161,42 @@ public class SapiClient {
             System.out.println(jsonResponse); //TODO: remove
 
             SearchResponse searchResponse = OBJECT_MAPPER.readValue(jsonResponse, SearchResponse.class);
+
+            return searchResponse;
+        } catch (Exception e) {
+            throw wrapException(uri, jsonResponse, e);
+        }
+    }
+    
+    /**
+     * This endpoint allows for the retrieval of various tyres of reference data from SAPI. 
+     * (Currently, a list of the categories or category groups).
+     * See http://developers.sensis.com.au/docs/endpoint_reference/Metadata
+     */
+    public MetadataResponse metadata(MetadataType dataType) {
+        URI uri = null;
+        String jsonResponse = null;
+        try {
+            HttpClient client = getHttpClient();
+
+            List<BasicNameValuePair> queryParams = new ArrayList<BasicNameValuePair>();
+
+            addQueryParam(queryParams, "key", apiKey);
+
+            uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, metadataPath + "/" + dataType.toString(),
+                    URLEncodedUtils.format(queryParams, "UTF-8"), null);
+
+            System.out.println(uri); //TODO: remove
+
+            HttpGet request = new HttpGet(uri);
+
+            HttpResponse httpResponse = client.execute(request);
+
+            jsonResponse = extractJsonResponse(httpResponse);
+
+            System.out.println(jsonResponse); //TODO: remove
+
+            MetadataResponse searchResponse = OBJECT_MAPPER.readValue(jsonResponse, MetadataResponse.class);
 
             return searchResponse;
         } catch (Exception e) {

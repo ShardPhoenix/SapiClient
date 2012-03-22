@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.List;
 
 public class SearchResponse {
+    
+    //TODO: add a toJson() method?
 
-	//TODO: metadata?
-	
 	private List<Listing> results;
 	private List<String> details;
 	private Long count;
