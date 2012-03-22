@@ -29,8 +29,9 @@ public class SapiClient {
     public static final String SAPI_HOST = "api.sensis.com.au";
     public static final int SAPI_PORT = 80;
     
-    public static final String SEARCH_PATH_TEMPLATE = "/ob-20110511/%s/search"; //TODO: can this change? - test vs prod - make configurable?
+    public static final String SEARCH_PATH_TEMPLATE = "/ob-20110511/%s/search";
     public static final String REPORT_PATH_TEMPLATE = "/ob-20110511/%s/report";
+    private static final String GET_BY_LISTING_ID_PATH_TEMPLATE = "/ob-20110511/%s/getByListingId";
     
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -42,6 +43,7 @@ public class SapiClient {
     private final String apiKey;
     private final String searchPath;
     private final String reportPath;
+    private final String getByListingIdPath;
 
     private String proxyUrl;
     private int proxyPort;
@@ -64,10 +66,11 @@ public class SapiClient {
         this.apiKey = apiKey;
         this.searchPath = String.format(SEARCH_PATH_TEMPLATE, environment.toString());
         this.reportPath = String.format(REPORT_PATH_TEMPLATE, environment.toString());
+        this.getByListingIdPath = String.format(GET_BY_LISTING_ID_PATH_TEMPLATE, environment.toString());
     }
 
-    //TODO: add getByListingId endpoint, metadata
-
+    //TODO: add metadata endpoint
+    
     /**
      * Calls the search endpoint with desired parameters, returning a SearchResponse object which contains listings and various metadata.
      * This method will throw a runtime exception if there is an exception during the search request.
@@ -121,13 +124,43 @@ public class SapiClient {
 
             return searchResponse;
         } catch (Exception e) {
-            String errorMessage = "";
-            if (jsonResponse != null) {
-                errorMessage = "Successfully called SAPI, but could not parse response: " + jsonResponse;
-            } else {
-                errorMessage = "Could not successfully call SAPI with url " + uri + " due to exception";
-            }
-            throw new RuntimeException(errorMessage, e);
+            throw wrapException(uri, jsonResponse, e);
+        }
+    }
+    
+    /**
+     * This endpoint retrieves a single listing based on a known listing id. The response format is the same as for a search,
+     * except that only one listing will be included in the results (or zero if the listing id is not found).
+     * (The listing id is the top-level "id" field in a listing object.)
+     */
+    public SearchResponse getByListingId(String listingId) {
+        URI uri = null;
+        String jsonResponse = null;
+        try {
+            HttpClient client = getHttpClient();
+
+            List<BasicNameValuePair> queryParams = new ArrayList<BasicNameValuePair>();
+
+            addQueryParam(queryParams, "key", apiKey);
+            addQueryParam(queryParams, "query", listingId);
+
+            uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, getByListingIdPath, URLEncodedUtils.format(queryParams, "UTF-8"), null);
+
+            System.out.println(uri); //TODO: remove
+
+            HttpGet request = new HttpGet(uri);
+
+            HttpResponse httpResponse = client.execute(request);
+
+            jsonResponse = extractJsonResponse(httpResponse);
+
+            System.out.println(jsonResponse); //TODO: remove
+
+            SearchResponse searchResponse = OBJECT_MAPPER.readValue(jsonResponse, SearchResponse.class);
+
+            return searchResponse;
+        } catch (Exception e) {
+            throw wrapException(uri, jsonResponse, e);
         }
     }
     
@@ -180,13 +213,7 @@ public class SapiClient {
 
             return reportResponse;
         } catch (Exception e) {
-            String errorMessage = "";
-            if (jsonResponse != null) {
-                errorMessage = "Successfully called SAPI, but could not parse response: " + jsonResponse;
-            } else {
-                errorMessage = "Could not successfully call SAPI with url " + uri + " due to exception";
-            }
-            throw new RuntimeException(errorMessage, e);
+            throw wrapException(uri, jsonResponse, e);
         }
 
     }
@@ -233,5 +260,15 @@ public class SapiClient {
                 }
             }
         }
+    }
+    
+    private RuntimeException wrapException(URI uri, String jsonResponse, Exception e) {
+        String errorMessage = "";
+        if (jsonResponse != null) {
+            errorMessage = "Successfully called SAPI, but could not parse response: " + jsonResponse;
+        } else {
+            errorMessage = "Could not successfully call SAPI with url " + uri + " due to exception";
+        }
+        return new RuntimeException(errorMessage, e);
     }
 }
