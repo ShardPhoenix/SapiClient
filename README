@@ -1,8 +1,8 @@
-This is a public Java API for accessing SAPI, the Sensis API (see http://developers.sensis.com.au/).
+This is a free open-source platform-independent Java client for accessing SAPI, the Sensis API (see http://developers.sensis.com.au/).
 
 Please report any bugs or feature requests to ryan.sattler@sensis.com.au
 
-//TODO: explain basic usage
+See Javadoc (eg on SapiClient) for usage.
 
 //TODO: licence
 
