@@ -115,15 +115,9 @@ public class SapiClient {
 
             uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, searchPath, URLEncodedUtils.format(queryParams, "UTF-8"), null);
 
-            System.out.println(uri); //TODO: remove
-
-            HttpGet request = new HttpGet(uri);
-
-            HttpResponse httpResponse = client.execute(request);
+            HttpResponse httpResponse = client.execute(new HttpGet(uri));
 
             jsonResponse = extractJsonResponse(httpResponse);
-
-            System.out.println(jsonResponse); //TODO: remove
 
             SearchResponse searchResponse = OBJECT_MAPPER.readValue(jsonResponse, SearchResponse.class);
 
@@ -151,15 +145,9 @@ public class SapiClient {
 
             uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, getByListingIdPath, URLEncodedUtils.format(queryParams, "UTF-8"), null);
 
-            System.out.println(uri); //TODO: remove
-
-            HttpGet request = new HttpGet(uri);
-
-            HttpResponse httpResponse = client.execute(request);
+            HttpResponse httpResponse = client.execute(new HttpGet(uri));
 
             jsonResponse = extractJsonResponse(httpResponse);
-
-            System.out.println(jsonResponse); //TODO: remove
 
             SearchResponse searchResponse = OBJECT_MAPPER.readValue(jsonResponse, SearchResponse.class);
 
@@ -170,7 +158,7 @@ public class SapiClient {
     }
     
     /**
-     * This endpoint allows for the retrieval of various tyres of reference data from SAPI. 
+     * This endpoint allows for the retrieval of various types of reference data from SAPI. 
      * (Currently, a list of the categories or category groups).
      * See http://developers.sensis.com.au/docs/endpoint_reference/Metadata
      */
@@ -187,15 +175,9 @@ public class SapiClient {
             uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, metadataPath + "/" + dataType.toString(),
                     URLEncodedUtils.format(queryParams, "UTF-8"), null);
 
-            System.out.println(uri); //TODO: remove
-
-            HttpGet request = new HttpGet(uri);
-
-            HttpResponse httpResponse = client.execute(request);
+            HttpResponse httpResponse = client.execute(new HttpGet(uri));
 
             jsonResponse = extractJsonResponse(httpResponse);
-
-            System.out.println(jsonResponse); //TODO: remove
 
             MetadataResponse searchResponse = OBJECT_MAPPER.readValue(jsonResponse, MetadataResponse.class);
 
@@ -209,15 +191,7 @@ public class SapiClient {
      * It is required that you use this endpoint to report various user actions back to Sensis. For an explanation of
      * what needs to be reported and how, see: http://developers.sensis.com.au/docs/using_endpoints/Reporting_Usage_Events
      * You can check the ReportResponse to ensure that the report was successful.
-     * 
-     * @param reportEvent
-     * @param userIp
-     * @param userAgent
-     * @param userSessionId
-     * @param content
-     * @param reportingId
-     * @param additionalReportingIds
-     * @return
+     *
      */
     public ReportReponse report(ReportingEvent reportEvent, String userIp, String userAgent, String userSessionId, String content,
             String reportingId, String... additionalReportingIds) {
@@ -240,15 +214,11 @@ public class SapiClient {
             uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, reportPath + "/" + reportEvent.toString(),
                     URLEncodedUtils.format(queryParams, "UTF-8"), null);
 
-            System.out.println(uri); //TODO: remove
-
             HttpGet request = new HttpGet(uri);
 
             HttpResponse httpResponse = client.execute(request);
 
             jsonResponse = extractJsonResponse(httpResponse);
-
-            System.out.println(jsonResponse); //TODO: remove
 
             ReportReponse reportResponse = OBJECT_MAPPER.readValue(jsonResponse, ReportReponse.class);
 
@@ -274,6 +244,7 @@ public class SapiClient {
             HttpHost proxyHost = new HttpHost(proxyUrl, proxyPort);
             client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
         }
+        
         return client;
     }
 
