@@ -22,6 +22,7 @@ import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import au.com.sensis.sapi.requestmodel.ReportingEvent;
+import au.com.sensis.sapi.requestmodel.SearchParams;
 import au.com.sensis.sapi.responsemodel.MetadataResponse;
 import au.com.sensis.sapi.responsemodel.ReportReponse;
 import au.com.sensis.sapi.responsemodel.SearchResponse;

@@ -1,13 +1,8 @@
-package au.com.sensis.sapi.client;
+package au.com.sensis.sapi.requestmodel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import au.com.sensis.sapi.requestmodel.BoundingBox;
-import au.com.sensis.sapi.requestmodel.ContentFilter;
-import au.com.sensis.sapi.requestmodel.ProductKeyword;
-import au.com.sensis.sapi.requestmodel.SortBy;
-import au.com.sensis.sapi.requestmodel.State;
 
 /**
  * Represents the query parameters to be passed to the /search endpoint of SAPI.
@@ -63,13 +58,13 @@ public class SearchParams {
 		private List<String> categoryIds = new ArrayList<String>();
 		private List<Integer> postcodes = new ArrayList<Integer>();
 		private List<String> suburbs = new ArrayList<String>();
-		public List<State> states = new ArrayList<State>();
-		public List<ContentFilter> contentFilters = new ArrayList<ContentFilter>();
-		public Integer locationTiers;
-		public BoundingBox boundingBox;
-		public Double radius;
-		public List<ProductKeyword> productKeywords = new ArrayList<ProductKeyword>();
-		public Boolean sensitiveCategories;
+		private List<State> states = new ArrayList<State>();
+		private List<ContentFilter> contentFilters = new ArrayList<ContentFilter>();
+		private Integer locationTiers;
+		private BoundingBox boundingBox;
+		private Double radius;
+		private List<ProductKeyword> productKeywords = new ArrayList<ProductKeyword>();
+		private Boolean sensitiveCategories;
 		
 		public Builder withQuery(String query) {
 			this.query = query;
