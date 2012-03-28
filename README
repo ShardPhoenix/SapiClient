@@ -4,6 +4,6 @@ Please report any bugs or feature requests to ryan.sattler@sensis.com.au
 
 See Javadoc (eg on SapiClient) for usage.
 
-//TODO: licence
-
+This software is free and open source, licenced under the Apache License 2.0. See LICENSE-2.0.txt.
+Included JARs from Apache Commons and Jackson have been used under the Apache License.
 

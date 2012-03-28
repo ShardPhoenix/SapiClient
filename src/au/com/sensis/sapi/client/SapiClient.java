@@ -65,7 +65,6 @@ public class SapiClient {
      * If using SapiClient from Android, you must use it from either an AsyncTask or a Service (network IO is not allowed on the main thread).
      * 
      * If you don't have an api key yet, you need to register for one at http://developers.sensis.com.au/
-     * @param apiKey
      */
     public SapiClient(String apiKey, SapiEnvironment environment) {
         this.apiKey = apiKey;
@@ -83,8 +82,6 @@ public class SapiClient {
      * 
      * More info at: http://developers.sensis.com.au/docs/endpoint_reference/Search
      * Interactive API explorer: http://developers.sensis.com.au/page/api_explorer
-     * @param params
-     * @return
      */
     public SearchResponse search(SearchParams params) {
         URI uri = null;
@@ -96,23 +93,24 @@ public class SapiClient {
 
             addQueryParam(queryParams, "key", apiKey);
 
+            // unique params
             addQueryParam(queryParams, "query", params.getQuery());
             addQueryParam(queryParams, "location", params.getLocation());
             addQueryParam(queryParams, "sortBy", params.getSortBy());
             addQueryParam(queryParams, "page", params.getPage());
             addQueryParam(queryParams, "rows", params.getRows());
+            addQueryParam(queryParams, "sensitiveCategories", params.getSensitiveCategories());
+            addQueryParam(queryParams, "radius", params.getRadius());
+            addQueryParam(queryParams, "locationTiers", params.getLocationTiers());
+            addQueryParam(queryParams, "boundingBox", params.getBoundingBox());
 
+            // repeatable params
             addQueryParams(queryParams, "categoryId", params.getCategoryIds());
             addQueryParams(queryParams, "postcode", params.getPostcodes());
             addQueryParams(queryParams, "suburb", params.getSuburbs());
             addQueryParams(queryParams, "state", params.getStates());
             addQueryParams(queryParams, "content", params.getContentFilters());
             addQueryParams(queryParams, "productKeyword", params.getProductKeywords());
-
-            addQueryParam(queryParams, "sensitiveCategories", params.getSensitiveCategories());
-            addQueryParam(queryParams, "radius", params.getRadius());
-            addQueryParam(queryParams, "locationTiers", params.getLocationTiers());
-            addQueryParam(queryParams, "boundingBox", params.getBoundingBox());
 
             uri = URIUtils.createURI("http", SAPI_HOST, SAPI_PORT, searchPath, URLEncodedUtils.format(queryParams, "UTF-8"), null);
 
